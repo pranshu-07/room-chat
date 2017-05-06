@@ -1,0 +1,106 @@
+<script src="/socket.io/socket.io.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+<script>
+	var socket = io.connect('http://localhost:8080');
+
+	// on connection to server, ask for user's name with an anonymous callback
+	socket.on('connect', function(){
+		// call the server-side function 'adduser' and send one parameter (value of prompt)
+		socket.emit('adduser', prompt("What's your name?"));
+	});
+
+	// listener, whenever the server emits 'updatechat', this updates the chat body
+	socket.on('updatechat', function (username, data) {
+		$('#conversation').append('<b>'+username + ':</b> ' + data + '<br>');
+	});
+
+	function switchRoom(room){
+		socket.emit('switchRoom', room);
+	}
+	
+	$(function(){
+		// when the client clicks SEND
+		$('#datasend').click( function() {
+			var message = $('#data').val();
+			$('#data').val('');
+			// tell server to execute 'sendchat' and send along one parameter
+			socket.emit('sendchat', message);
+		});
+
+		// when the client hits ENTER on their keyboard
+		$('#data').keypress(function(e) {
+			if(e.which == 13) {
+				$(this).blur();
+				$('#datasend').focus().click();
+			}
+		});
+	});
+
+</script>
+
+</div>
+<div id="msg-box-wrapper">
+	<div id="msg-box">
+		<div id="conversation"></div>
+		<div id="chat-field-wrapper">
+			<div id="data-wrapper">
+				<input id="data" class="chat-field" />
+			</div>
+			<div id="button-wrapper">
+				<button id="datasend">Send</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<style type="text/css">
+	body {
+		height: 100%;
+		width: 100%;
+		position: absolute;
+		overflow: hidden;
+		margin: 0;
+	}
+	#msg-box-wrapper {
+	    height: 100%;
+   		width: 100%;
+   		display: flex;
+   		flex-direction: column;
+   		align-items: center;
+   	    background-color: #e8e5e5;
+	}
+	#msg-box {
+	    width: 775px;
+	    display: flex;
+	    flex-direction: column;
+	}
+	#conversation {
+	    height: 100%;
+	    overflow-y: auto;
+	    padding: 30px 20px 0px 20px;
+	    background-color: #ffffff;
+	}
+	#chat-field-wrapper {
+	    display: flex;
+	    height: 55px;
+	    width: 100%;
+	    justify-content: center;
+	    align-items: center;
+	    padding: 10px 0px 10px 0px;
+	    background-color: #cccccc;
+	}
+	#button-wrapper {
+    	padding-left: 14px;
+	}
+	.chat-field {
+		width: 600px;
+		height: 40px;
+	    font-size: 16px;
+    	padding: 0px 10px 0px 10px;
+	}
+	#datasend {
+	    height: 40px;
+	    width: 75px;
+	    font-size: 16px;
+	}
+</style>
